@@ -145,6 +145,14 @@ Parameters:
         ]
         Default: "Use Only U.S., Canada and Europe"
 
+    ShowUI:
+        Type: String
+        Description: create the ui stack
+        Default: "Yes"
+        AllowedValues:
+            - "No"
+            - "Yes"
+
     # Solution anonymous metric
     AnonymousUsage:
         Type: String
@@ -209,6 +217,10 @@ Conditions:
     bAimlAudioText: !Equals [
         !Ref AIOptions,
         "Audio and Text (Transcript,Keyphrase,Entity,Text)"
+    ]
+    bCreateUIStack: !Equals [
+        !Ref ShowUI,
+        "Yes"
     ]
 
 Resources:
@@ -1306,6 +1318,7 @@ Resources:
                 BucketPrefix: !Sub "${RandomizedName.OutputString}"
                 CustomResourceArn: !GetAtt CustomResourceFunction.Arn
                 SNSTopicArn: !Ref SNSTopic
+                ShowUI: !Ref ShowUI
                 # Iot
                 IotHost: !GetAtt IotUrl.Endpoint
                 IotTopic: !Sub [
@@ -1331,6 +1344,7 @@ Resources:
     #
     WebAppStack:
         Type: AWS::CloudFormation::Stack
+        Condition: bCreateUIStack
         Properties:
             TemplateURL: !Sub [
                 "https://${x0}-${AWS::Region}.s3.amazonaws.com/${x1}/media2cloud-webapp-stack.template", {

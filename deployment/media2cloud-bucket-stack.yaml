@@ -77,7 +77,13 @@ Parameters:
     CoreLibLayer:
         Type: String
         Description: Core Library layer
-
+    ShowUI:
+        Type: String
+        Description: create the ui stack
+        Default: "Yes"
+        AllowedValues:
+            - "No"
+            - "Yes"
 Metadata:
   cfn-lint:
     config:
@@ -156,6 +162,10 @@ Conditions:
             "Proxy"
         ],
         ""
+    ]
+    CreateUI: !Equals [
+        !Ref ShowUI,
+        "Yes"
     ]
 
 Resources:
@@ -351,6 +361,7 @@ Resources:
     # Website bucket to host media2cloud web app
     #
     WebBucket:
+        Condition: CreateUI
         Type: AWS::S3::Bucket
         DeletionPolicy: Retain
         Properties:
@@ -412,6 +423,7 @@ Resources:
                 Status: Enabled
 
     WebBucketPolicy:
+        Condition: CreateUI
         Type: AWS::S3::BucketPolicy
         Properties:
             Bucket: !Ref WebBucket
@@ -616,7 +628,11 @@ Outputs:
         Description: Bucket Name (Proxy)
 
     WebBucket:
-        Value: !Ref WebBucket
+        Value: !If [
+            CreateUI,
+            !Ref WebBucket,
+            ""
+        ]
         Description: Bucket Name (Web)
 
     ExecutionRoleArn:
